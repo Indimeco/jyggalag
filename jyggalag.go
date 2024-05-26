@@ -4,8 +4,12 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
+	"path/filepath"
+	"time"
 
 	"github.com/indimeco/jyggalag/internal/config"
+	"github.com/indimeco/jyggalag/internal/template"
 	"github.com/urfave/cli/v2"
 )
 
@@ -41,7 +45,21 @@ func main() {
 						return err
 					}
 
-					fmt.Printf("Would write journal to %v", c.NotesDir)
+					journalName := time.Now().Format("2006-01-02")
+					journalPath := filepath.Join(c.NotesDir, "journal", journalName+".md")
+
+					err = template.CopyTemplate("./templates/journal.md", journalPath)
+					if err != nil {
+						return fmt.Errorf("Could not copy template to %v: %e", journalPath, err)
+					}
+
+					// TODO make this come from config
+					cmd := exec.Command("vim", journalPath)
+					cmd.Stdin = os.Stdin
+					cmd.Stdout = os.Stdout
+					if err := cmd.Run(); err != nil {
+						fmt.Println("Error: ", err)
+					}
 					return nil
 				},
 			},
