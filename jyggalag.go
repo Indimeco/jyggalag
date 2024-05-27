@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"time"
 
@@ -36,6 +35,19 @@ func main() {
 				},
 			},
 			{
+				Name:    "config_editor",
+				Aliases: []string{},
+				Usage:   "set the editor",
+				Action: func(cCtx *cli.Context) error {
+					err := config.SetEditor(cCtx.Args().First())
+					if err != nil {
+						return err
+					}
+
+					return nil
+				},
+			},
+			{
 				Name:    "new_journal",
 				Aliases: []string{"nj"},
 				Usage:   "create a new day book entry",
@@ -50,16 +62,10 @@ func main() {
 
 					err = template.CopyTemplate("./templates/journal.md", journalPath)
 					if err != nil {
-						return fmt.Errorf("Could not copy template to %v: %e", journalPath, err)
+						return fmt.Errorf("Could not copy template to %v: %w", journalPath, err)
 					}
 
-					// TODO make this come from config
-					cmd := exec.Command("vim", journalPath)
-					cmd.Stdin = os.Stdin
-					cmd.Stdout = os.Stdout
-					if err := cmd.Run(); err != nil {
-						fmt.Println("Error: ", err)
-					}
+					err = template.OpenEditor(c.Editor, journalPath)
 					return nil
 				},
 			},

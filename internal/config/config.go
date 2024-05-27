@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -11,15 +12,28 @@ const configFileName = "jyggalag.json"
 
 type Config struct {
 	NotesDir string `json:"notes_dir"`
+	Editor   string `json:"editor"`
+}
+
+func SetEditor(editor string) error {
+	return setConfig(func(c *Config) {
+		c.Editor = editor
+	})
 }
 
 func SetNotesDir(path string) error {
+	return setConfig(func(c *Config) {
+		c.NotesDir = path
+	})
+}
+
+func setConfig(updateFunc func(*Config)) error {
 	initConfig()
 	c, err := LoadConfig()
 	if err != nil {
-		return err
+		return fmt.Errorf("Could not load config %w", err)
 	}
-	c.NotesDir = path
+	updateFunc(c)
 	return saveConfig(c)
 }
 
@@ -49,11 +63,14 @@ func initConfig() error {
 	}
 	// make sure the config file always exists
 	err = os.MkdirAll(dir, 0777)
-	emptyJson, err := json.Marshal(Config{})
+	c, err := json.Marshal(Config{
+		NotesDir: "~/projects/notes",
+		Editor:   "vim",
+	})
 	if err != nil {
 		return err
 	}
-	os.WriteFile(filepath.Join(dir, configFileName), emptyJson, 0644)
+	err = os.WriteFile(filepath.Join(dir, configFileName), c, 0644)
 	if err != nil {
 		return err
 	}
