@@ -50,7 +50,7 @@ func main() {
 			{
 				Name:    "new_journal",
 				Aliases: []string{"nj"},
-				Usage:   "create a new day book entry",
+				Usage:   "create a new journal entry",
 				Action: func(cCtx *cli.Context) error {
 					c, err := config.LoadConfig()
 					if err != nil {
@@ -66,6 +66,30 @@ func main() {
 					}
 
 					err = template.OpenEditor(c.Editor, journalPath)
+					return nil
+				},
+			},
+			{
+				Name:    "new_zettelkasten",
+				Aliases: []string{"nz"},
+				Usage:   "create a new zettelkasten",
+				Action: func(cCtx *cli.Context) error {
+					c, err := config.LoadConfig()
+					if err != nil {
+						return err
+					}
+
+					zettelName := cCtx.Args().First()
+					zettelDir := filepath.Join(c.NotesDir, "zettelkasten")
+					zettelId := 99
+					zettelPath := filepath.Join(zettelDir, fmt.Sprintf("[%d]%v.md", zettelId, zettelName))
+
+					err = template.CopyTemplate("./templates/default.md", zettelPath)
+					if err != nil {
+						return fmt.Errorf("Could not copy template to %v: %w", zettelPath, err)
+					}
+
+					err = template.OpenEditor(c.Editor, zettelPath)
 					return nil
 				},
 			},

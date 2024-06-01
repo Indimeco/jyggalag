@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
 )
 
 const configFileName = "jyggalag.json"
@@ -103,20 +102,12 @@ func LoadConfig() (*Config, error) {
 }
 
 func getConfigFileDir() (string, error) {
-	var configDir string
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
 	}
 
-	switch runtime.GOOS {
-	case "windows":
-		configDir = os.Getenv("APPDATA")
-	case "darwin":
-		configDir = filepath.Join(homeDir, "Library", "Application Support")
-	default:
-		configDir = filepath.Join(homeDir, ".config")
-	}
+	configDir := filepath.Join(homeDir, ".config")
 
 	return filepath.Join(configDir, "jyggalag"), nil
 }
