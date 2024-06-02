@@ -74,7 +74,7 @@ func CopyTemplate(templatePath string, destination string) error {
 		}
 		err = os.WriteFile(destination, []byte(contents), 0644)
 		if err != nil {
-			return fmt.Errorf("Failed to write new template: %w", err)
+			return fmt.Errorf("Failed to write new template to %v: %w", destination, err)
 		}
 	}
 	// File already exists, so we just continue

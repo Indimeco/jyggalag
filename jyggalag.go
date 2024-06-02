@@ -62,13 +62,7 @@ func main() {
 					journalName := timestr.GetCanonicalDateString()
 					journalPath := filepath.Join(c.NotesDir, "journal", journalName+".md")
 
-					err = template.CopyTemplate("./templates/journal.md", journalPath)
-					if err != nil {
-						return fmt.Errorf("Could not copy template to %v: %w", journalPath, err)
-					}
-
-					err = template.OpenEditor(c.Editor, journalPath)
-					return nil
+					return createAndOpen(journalPath, "./templates/journal.md")
 				},
 			},
 			{
@@ -81,16 +75,10 @@ func main() {
 						return err
 					}
 
-					journalName := timestr.GetCanonicalDateString()
-					journalPath := filepath.Join(c.NotesDir, "journal", journalName+".md")
+					daybookName := timestr.GetCanonicalDateString()
+					daybookPath := filepath.Join(c.NotesDir, "journal", daybookName+".md")
 
-					err = template.CopyTemplate("./templates/daybook.md", journalPath)
-					if err != nil {
-						return fmt.Errorf("Could not copy template to %v: %w", journalPath, err)
-					}
-
-					err = template.OpenEditor(c.Editor, journalPath)
-					return nil
+					return createAndOpen(daybookPath, "./templates/daybook.md")
 				},
 			},
 			{
@@ -105,22 +93,13 @@ func main() {
 
 					zettelName := cCtx.Args().First()
 					zettelDir := filepath.Join(c.NotesDir, "zettelkasten")
-					zettelIdRegex := regexp.MustCompile(`^\[(\d+)\]`)
-					zettelId, err := template.GetLastIdInDir(zettelDir, zettelIdRegex)
-					zettelId = zettelId + 1
-					if err != nil {
-						return fmt.Errorf("Could not get new zettel id: %w", err)
-					}
-
-					zettelPath := filepath.Join(zettelDir, fmt.Sprintf("[%d] %v.md", zettelId, zettelName))
-
-					err = template.CopyTemplate("./templates/zettelkasten.md", zettelPath)
+					zettelId, err := getNextZettelID(zettelDir)
 					if err != nil {
 						return err
 					}
 
-					err = template.OpenEditor(c.Editor, zettelPath)
-					return nil
+					zettelPath := filepath.Join(zettelDir, fmt.Sprintf("[%d] %v.md", zettelId, zettelName))
+					return createAndOpen(zettelPath, "./templates/zettelkasten.md")
 				},
 			},
 			{
@@ -153,13 +132,7 @@ func main() {
 					}
 
 					compositionPath := filepath.Join(compositionDir, compositionName)
-					err = template.CopyTemplate("./templates/composition.md", compositionPath)
-					if err != nil {
-						return fmt.Errorf("Could not copy template to %v: %w", compositionPath, err)
-					}
-
-					err = template.OpenEditor(c.Editor, compositionPath)
-					return nil
+					return createAndOpen(compositionPath, "./templates/composition.md")
 				},
 			},
 			{
@@ -173,23 +146,15 @@ func main() {
 					}
 
 					zettelDir := filepath.Join(c.NotesDir, "zettelkasten")
-					zettelIdRegex := regexp.MustCompile(`^\[(\d+)\]`)
-					zettelId, err := template.GetLastIdInDir(zettelDir, zettelIdRegex)
-					zettelId = zettelId + 1
+					zettelId, err := getNextZettelID(zettelDir)
 					if err != nil {
-						return fmt.Errorf("Could not get new zettel id: %w", err)
+						return err
 					}
 
 					reflectionName := fmt.Sprintf("[%v] Reflection-%v", zettelId, timestr.GetCanonicalDateString())
 					zettelPath := filepath.Join(zettelDir, reflectionName)
 
-					err = template.CopyTemplate("./templates/reflection.md", zettelPath)
-					if err != nil {
-						return err
-					}
-
-					err = template.OpenEditor(c.Editor, zettelPath)
-					return nil
+					return createAndOpen(zettelPath, "./templates/reflection.md")
 				},
 			},
 		},
@@ -198,4 +163,29 @@ func main() {
 	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func createAndOpen(destination string, templatePath string) error {
+	c, err := config.LoadConfig()
+	if err != nil {
+		return err
+	}
+
+	err = template.CopyTemplate(templatePath, destination)
+	if err != nil {
+		return err
+	}
+
+	err = template.OpenEditor(c.Editor, destination)
+	return err
+}
+
+func getNextZettelID(zettelDir string) (int, error) {
+	zettelIdRegex := regexp.MustCompile(`^\[(\d+)\]`)
+	zettelId, err := template.GetLastIdInDir(zettelDir, zettelIdRegex)
+	zettelId = zettelId + 1
+	if err != nil {
+		return 0, fmt.Errorf("Could not get new zettel id: %w", err)
+	}
+	return zettelId + 1, nil
 }
