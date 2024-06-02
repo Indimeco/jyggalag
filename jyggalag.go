@@ -6,10 +6,11 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"time"
+	"strconv"
 
 	"github.com/indimeco/jyggalag/internal/config"
 	"github.com/indimeco/jyggalag/internal/template"
+	"github.com/indimeco/jyggalag/internal/timestr"
 	"github.com/urfave/cli/v2"
 )
 
@@ -58,7 +59,7 @@ func main() {
 						return err
 					}
 
-					journalName := time.Now().Format("2006-01-02")
+					journalName := timestr.GetCanonicalDateString()
 					journalPath := filepath.Join(c.NotesDir, "journal", journalName+".md")
 
 					err = template.CopyTemplate("./templates/journal.md", journalPath)
@@ -84,18 +85,58 @@ func main() {
 					zettelDir := filepath.Join(c.NotesDir, "zettelkasten")
 					zettelIdRegex := regexp.MustCompile(`^\[(\d+)\]`)
 					zettelId, err := template.GetLastIdInDir(zettelDir, zettelIdRegex)
+					zettelId = zettelId + 1
 					if err != nil {
 						return fmt.Errorf("Could not get new zettel id: %w", err)
 					}
 
 					zettelPath := filepath.Join(zettelDir, fmt.Sprintf("[%d] %v.md", zettelId, zettelName))
 
-					err = template.CopyTemplate("./templates/default.md", zettelPath)
+					err = template.CopyTemplate("./templates/zettelkasten.md", zettelPath)
 					if err != nil {
-						return fmt.Errorf("Could not copy template to %v: %w", zettelPath, err)
+						return err
 					}
 
 					err = template.OpenEditor(c.Editor, zettelPath)
+					return nil
+				},
+			},
+			{
+				Name:    "new_composition",
+				Aliases: []string{"np"},
+				Usage:   "create a new composition",
+				Action: func(cCtx *cli.Context) error {
+					c, err := config.LoadConfig()
+					if err != nil {
+						return err
+					}
+
+					baseName := timestr.GetCanonicalDateString()
+					compositionDir := filepath.Join(c.NotesDir, "composition", timestr.GetCurrentYear())
+
+					err = os.MkdirAll(compositionDir, 0777)
+					if err != nil {
+						return fmt.Errorf("Could not create composition directory %v: %w", compositionDir, err)
+					}
+
+					compositionId, err := strconv.Atoi(cCtx.Args().First())
+					if err != nil {
+						compositionId = 0
+					}
+					var compositionName string
+					if compositionId > 0 {
+						compositionName = fmt.Sprintf("%v-%v.md", baseName, compositionId)
+					} else {
+						compositionName = fmt.Sprintf("%v.md", baseName)
+					}
+
+					compositionPath := filepath.Join(compositionDir, compositionName)
+					err = template.CopyTemplate("./templates/composition.md", compositionPath)
+					if err != nil {
+						return fmt.Errorf("Could not copy template to %v: %w", compositionPath, err)
+					}
+
+					err = template.OpenEditor(c.Editor, compositionPath)
 					return nil
 				},
 			},

@@ -7,13 +7,14 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
+
+	"github.com/indimeco/jyggalag/internal/timestr"
 )
 
 var templateValues = map[string]func() string{
-	"CURRENT_DATE":  getCurrentDate,
-	"CURRENT_YEAR":  getCurrentYear,
-	"CURRENT_MONTH": getCurrentMonth,
+	"CURRENT_DATE":  timestr.GetCurrentDate,
+	"CURRENT_YEAR":  timestr.GetCurrentYear,
+	"CURRENT_MONTH": timestr.GetCurrentMonth,
 }
 
 const cursorTemplate = "$0"
@@ -27,21 +28,6 @@ func OpenEditor(editor string, path string) error {
 		return fmt.Errorf("Failed to open editor %w", err)
 	}
 	return nil
-}
-
-func getCurrentDate() string {
-	time := time.Now()
-	return time.Format("02")
-}
-
-func getCurrentYear() string {
-	time := time.Now()
-	return time.Format("2006")
-}
-
-func getCurrentMonth() string {
-	time := time.Now()
-	return time.Format("01")
 }
 
 func getLastIdMatching(set []string, r *regexp.Regexp) (int, error) {
