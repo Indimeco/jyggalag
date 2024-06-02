@@ -140,6 +140,36 @@ func main() {
 					return nil
 				},
 			},
+			{
+				Name:    "new_reflection",
+				Aliases: []string{"nr"},
+				Usage:   "create a new reflection",
+				Action: func(cCtx *cli.Context) error {
+					c, err := config.LoadConfig()
+					if err != nil {
+						return err
+					}
+
+					zettelDir := filepath.Join(c.NotesDir, "zettelkasten")
+					zettelIdRegex := regexp.MustCompile(`^\[(\d+)\]`)
+					zettelId, err := template.GetLastIdInDir(zettelDir, zettelIdRegex)
+					zettelId = zettelId + 1
+					if err != nil {
+						return fmt.Errorf("Could not get new zettel id: %w", err)
+					}
+
+					reflectionName := fmt.Sprintf("[%v] Reflection-%v", zettelId, timestr.GetCanonicalDateString())
+					zettelPath := filepath.Join(zettelDir, reflectionName)
+
+					err = template.CopyTemplate("./templates/reflection.md", zettelPath)
+					if err != nil {
+						return err
+					}
+
+					err = template.OpenEditor(c.Editor, zettelPath)
+					return nil
+				},
+			},
 		},
 	}
 
