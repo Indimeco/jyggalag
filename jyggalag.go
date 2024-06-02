@@ -72,6 +72,28 @@ func main() {
 				},
 			},
 			{
+				Name:    "new_daybook",
+				Aliases: []string{"nd"},
+				Usage:   "create a new daybook entry",
+				Action: func(cCtx *cli.Context) error {
+					c, err := config.LoadConfig()
+					if err != nil {
+						return err
+					}
+
+					journalName := timestr.GetCanonicalDateString()
+					journalPath := filepath.Join(c.NotesDir, "journal", journalName+".md")
+
+					err = template.CopyTemplate("./templates/daybook.md", journalPath)
+					if err != nil {
+						return fmt.Errorf("Could not copy template to %v: %w", journalPath, err)
+					}
+
+					err = template.OpenEditor(c.Editor, journalPath)
+					return nil
+				},
+			},
+			{
 				Name:    "new_zettelkasten",
 				Aliases: []string{"nz"},
 				Usage:   "create a new zettelkasten",
