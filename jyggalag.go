@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"time"
 
 	"github.com/indimeco/jyggalag/internal/config"
@@ -81,8 +82,13 @@ func main() {
 
 					zettelName := cCtx.Args().First()
 					zettelDir := filepath.Join(c.NotesDir, "zettelkasten")
-					zettelId := 99
-					zettelPath := filepath.Join(zettelDir, fmt.Sprintf("[%d]%v.md", zettelId, zettelName))
+					zettelIdRegex := regexp.MustCompile(`^\[(\d+)\]`)
+					zettelId, err := template.GetLastIdInDir(zettelDir, zettelIdRegex)
+					if err != nil {
+						return fmt.Errorf("Could not get new zettel id: %w", err)
+					}
+
+					zettelPath := filepath.Join(zettelDir, fmt.Sprintf("[%d] %v.md", zettelId, zettelName))
 
 					err = template.CopyTemplate("./templates/default.md", zettelPath)
 					if err != nil {

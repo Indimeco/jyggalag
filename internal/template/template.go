@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -40,6 +42,35 @@ func getCurrentYear() string {
 func getCurrentMonth() string {
 	time := time.Now()
 	return time.Format("01")
+}
+
+func getLastIdMatching(set []string, r *regexp.Regexp) (int, error) {
+	var index = 0
+	for _, v := range set {
+		matches := r.FindStringSubmatch(v)
+		if len(matches) < 2 {
+			// no submatch
+			continue
+		}
+		i, _ := strconv.Atoi(matches[1])
+		if i > index {
+			index = i
+		}
+	}
+	return index, nil
+}
+
+func GetLastIdInDir(dir string, r *regexp.Regexp) (int, error) {
+	t, err := os.ReadDir(dir)
+	if err != nil {
+		return -1, fmt.Errorf("Failed to read directory for finding last id %w", err)
+	}
+	var names []string
+	for _, v := range t {
+		names = append(names, v.Name())
+	}
+
+	return getLastIdMatching(names, r)
 }
 
 func CopyTemplate(templatePath string, destination string) error {
