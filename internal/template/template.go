@@ -1,6 +1,7 @@
 package template
 
 import (
+	"embed"
 	"fmt"
 	"os"
 	"os/exec"
@@ -10,6 +11,9 @@ import (
 
 	"github.com/indimeco/jyggalag/internal/timestr"
 )
+
+//go:embed templates
+var templateFiles embed.FS
 
 var templateValues = map[string]func() string{
 	"CURRENT_DATE":  timestr.GetCurrentDate,
@@ -60,7 +64,7 @@ func GetLastIdInDir(dir string, r *regexp.Regexp) (int, error) {
 }
 
 func CopyTemplate(templatePath string, destination string) error {
-	t, err := os.ReadFile(templatePath)
+	t, err := templateFiles.ReadFile(templatePath)
 	if err != nil {
 		return fmt.Errorf("Could not read template %w", err)
 	}

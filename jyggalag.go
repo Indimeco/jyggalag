@@ -62,7 +62,7 @@ func main() {
 					journalName := timestr.GetCanonicalDateString()
 					journalPath := filepath.Join(c.NotesDir, "journal", journalName+".md")
 
-					return createAndOpen(journalPath, "./templates/journal.md")
+					return createAndOpen(journalPath, "templates/journal.md")
 				},
 			},
 			{
@@ -78,7 +78,7 @@ func main() {
 					daybookName := timestr.GetCanonicalDateString()
 					daybookPath := filepath.Join(c.NotesDir, "journal", daybookName+".md")
 
-					return createAndOpen(daybookPath, "./templates/daybook.md")
+					return createAndOpen(daybookPath, "templates/daybook.md")
 				},
 			},
 			{
@@ -99,7 +99,7 @@ func main() {
 					}
 
 					zettelPath := filepath.Join(zettelDir, fmt.Sprintf("[%d] %v.md", zettelId, zettelName))
-					return createAndOpen(zettelPath, "./templates/zettelkasten.md")
+					return createAndOpen(zettelPath, "templates/zettelkasten.md")
 				},
 			},
 			{
@@ -132,7 +132,7 @@ func main() {
 					}
 
 					compositionPath := filepath.Join(compositionDir, compositionName)
-					return createAndOpen(compositionPath, "./templates/composition.md")
+					return createAndOpen(compositionPath, "templates/composition.md")
 				},
 			},
 			{
@@ -154,7 +154,7 @@ func main() {
 					reflectionName := fmt.Sprintf("[%v] Reflection-%v", zettelId, timestr.GetCanonicalDateString())
 					zettelPath := filepath.Join(zettelDir, reflectionName)
 
-					return createAndOpen(zettelPath, "./templates/reflection.md")
+					return createAndOpen(zettelPath, "templates/reflection.md")
 				},
 			},
 		},
