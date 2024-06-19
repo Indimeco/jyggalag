@@ -62,6 +62,10 @@ func initConfig() error {
 	}
 	// make sure the config file always exists
 	err = os.MkdirAll(dir, 0777)
+	if err != nil {
+		return err
+	}
+
 	c, err := json.Marshal(Config{
 		NotesDir: "~/projects/notes",
 		Editor:   "vim",
@@ -69,6 +73,7 @@ func initConfig() error {
 	if err != nil {
 		return err
 	}
+
 	err = os.WriteFile(filepath.Join(dir, configFileName), c, 0644)
 	if err != nil {
 		return err

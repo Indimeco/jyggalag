@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/indimeco/jyggalag/internal/config"
+	"github.com/indimeco/jyggalag/internal/state"
 	"github.com/indimeco/jyggalag/internal/template"
 	"github.com/indimeco/jyggalag/internal/timestr"
 	"github.com/urfave/cli/v2"
@@ -176,6 +177,7 @@ func createAndOpen(destination string, templatePath string) error {
 		return err
 	}
 
+	state.WriteRecent(destination)
 	err = template.OpenEditor(c.Editor, destination)
 	return err
 }
