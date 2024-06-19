@@ -4,21 +4,21 @@ import (
 	"time"
 )
 
-func GetCurrentDate() string {
+func CurrentDate() string {
 	time := time.Now()
 	return time.Format("02")
 }
 
-func GetCurrentYear() string {
+func CurrentYear() string {
 	time := time.Now()
 	return time.Format("2006")
 }
 
-func GetCurrentMonth() string {
+func CurrentMonth() string {
 	time := time.Now()
 	return time.Format("01")
 }
 
-func GetCanonicalDateString() string {
+func CanonicalDateString() string {
 	return time.Now().Format("2006-01-02")
 }

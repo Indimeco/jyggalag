@@ -16,9 +16,9 @@ import (
 var templateFiles embed.FS
 
 var templateValues = map[string]func() string{
-	"CURRENT_DATE":  timestr.GetCurrentDate,
-	"CURRENT_YEAR":  timestr.GetCurrentYear,
-	"CURRENT_MONTH": timestr.GetCurrentMonth,
+	"CURRENT_DATE":  timestr.CurrentDate,
+	"CURRENT_YEAR":  timestr.CurrentYear,
+	"CURRENT_MONTH": timestr.CurrentMonth,
 }
 
 const cursorTemplate = "$0"

@@ -59,7 +59,7 @@ func main() {
 						return err
 					}
 
-					journalName := timestr.GetCanonicalDateString()
+					journalName := timestr.CanonicalDateString()
 					journalPath := filepath.Join(c.NotesDir, "journal", journalName+".md")
 
 					return createAndOpen(journalPath, "templates/journal.md")
@@ -75,7 +75,7 @@ func main() {
 						return err
 					}
 
-					daybookName := timestr.GetCanonicalDateString()
+					daybookName := timestr.CanonicalDateString()
 					daybookPath := filepath.Join(c.NotesDir, "journal", daybookName+".md")
 
 					return createAndOpen(daybookPath, "templates/daybook.md")
@@ -112,8 +112,8 @@ func main() {
 						return err
 					}
 
-					baseName := timestr.GetCanonicalDateString()
-					compositionDir := filepath.Join(c.NotesDir, "composition", timestr.GetCurrentYear())
+					baseName := timestr.CanonicalDateString()
+					compositionDir := filepath.Join(c.NotesDir, "composition", timestr.CurrentYear())
 
 					err = os.MkdirAll(compositionDir, 0777)
 					if err != nil {
@@ -151,7 +151,7 @@ func main() {
 						return err
 					}
 
-					reflectionName := fmt.Sprintf("[%v] Reflection-%v", zettelId, timestr.GetCanonicalDateString())
+					reflectionName := fmt.Sprintf("[%v] Reflection-%v", zettelId, timestr.CanonicalDateString())
 					zettelPath := filepath.Join(zettelDir, reflectionName)
 
 					return createAndOpen(zettelPath, "templates/reflection.md")
