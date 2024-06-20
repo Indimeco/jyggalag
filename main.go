@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/indimeco/jyggalag/internal/config"
+	"github.com/indimeco/jyggalag/internal/recent"
 	"github.com/indimeco/jyggalag/internal/state"
 	"github.com/indimeco/jyggalag/internal/template"
 	"github.com/indimeco/jyggalag/internal/timestr"
@@ -156,6 +157,25 @@ func main() {
 					zettelPath := filepath.Join(zettelDir, reflectionName)
 
 					return createAndOpen(zettelPath, "templates/reflection.md")
+				},
+			},
+			{
+				Name:    "open_recent",
+				Aliases: []string{"or"},
+				Usage:   "open a recent note",
+				Action: func(cCtx *cli.Context) error {
+					c, err := config.LoadConfig()
+					if err != nil {
+						return err
+					}
+
+					recentNote, err := recent.SelectRecent()
+					if err != nil {
+						return err
+					}
+
+					state.WriteRecent(recentNote)
+					return template.OpenEditor(c.Editor, recentNote)
 				},
 			},
 		},
