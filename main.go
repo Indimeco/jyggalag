@@ -173,6 +173,9 @@ func main() {
 					if err != nil {
 						return err
 					}
+					if recentNote == "" {
+						return nil
+					}
 
 					state.WriteRecent(recentNote)
 					return template.OpenEditor(c.Editor, recentNote)

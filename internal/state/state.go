@@ -1,6 +1,7 @@
 package state
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"os"
@@ -25,6 +26,37 @@ func WriteRecent(recent string) {
 	}
 }
 
+func ReadRecent() ([]string, error) {
+	stateDir, err := createState()
+	if err != nil {
+		log.Printf("Warning: Failed to create recents file %v", err)
+	}
+
+	var lines []string
+	file, err := os.Open(path.Join(stateDir, "recents"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		t := scanner.Text()
+		if len(lines) >= 5 {
+			break
+		}
+		if !contains(lines, t) {
+			lines = append(lines, t)
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	return lines, nil
+}
+
 func createState() (string, error) {
 	userDir, err := user.Current()
 	if err != nil {
@@ -39,4 +71,13 @@ func createState() (string, error) {
 	}
 
 	return stateDir, nil
+}
+
+func contains(slice []string, s string) bool {
+	for _, v := range slice {
+		if v == s {
+			return true
+		}
+	}
+	return false
 }

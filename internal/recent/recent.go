@@ -2,8 +2,11 @@ package recent
 
 import (
 	"fmt"
+	"log"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/indimeco/jyggalag/internal/state"
 )
 
 type model struct {
@@ -13,8 +16,12 @@ type model struct {
 }
 
 func initialModel() model {
+	recents, err := state.ReadRecent()
+	if err != nil {
+		log.Println(fmt.Sprintf("Warning: failed to read recents: %v", err))
+	}
 	return model{
-		recents: []string{"First", "Second", "Third"},
+		recents: recents,
 		cursor:  0,
 	}
 }
@@ -23,6 +30,10 @@ func (m model) Init() tea.Cmd {
 	return nil
 }
 
+var cursorStyle = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("82")).Blink(true)
+var selectedStyle = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("82"))
+var footerStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("8"))
+
 func (m model) View() string {
 	s := "Select recent note\n\n"
 
@@ -30,13 +41,14 @@ func (m model) View() string {
 
 		cursor := " "
 		if m.cursor == i {
-			cursor = ">"
+			cursor = cursorStyle.Render(">")
+			s += fmt.Sprintf("%s %s\n", cursor, selectedStyle.Render(recent))
+		} else {
+			s += fmt.Sprintf("%s %s\n", cursor, recent)
 		}
-
-		s += fmt.Sprintf("%s %s\n", cursor, recent)
 	}
 
-	s += "\nPress esc to quit.\n"
+	s += footerStyle.Render("\nPress esc to quit.\n")
 
 	return s
 }
