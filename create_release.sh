@@ -2,8 +2,7 @@
 
 package_name="jyggalag"
 	
-# might have to add "android/arm" but requires additional config
-platforms=("darwin/amd64" "linux/amd64")
+platforms=("darwin/amd64" "linux/amd64" "android/arm64")
 
 for platform in "${platforms[@]}"
 do
@@ -11,9 +10,11 @@ do
 	GOOS=${platform_split[0]}
 	GOARCH=${platform_split[1]}
 	output_name='./build/'$package_name'-'$GOOS'-'$GOARCH
-	if [ $GOOS = "windows" ]; then
-		output_name+='.exe'
-	fi	
+	if [ $GOOS == "android" ]; then
+		CGO_ENABLED=1
+		CC="/etc/android-ndk-r26d/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android28-clang" 
+		CXX="/etc/android-ndk-r26d/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android28-clang++"
+	fi
 
 	env GOOS=$GOOS GOARCH=$GOARCH go build -o $output_name $package
 	if [ $? -ne 0 ]; then
