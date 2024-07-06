@@ -21,7 +21,8 @@ func WriteRecent(recent string) {
 	if err != nil {
 		log.Printf("Warning: Failed to open recents file %v", err)
 	}
-	if _, err := f.Write([]byte(fmt.Sprintf("%v\n", recent))); err != nil {
+	_, err = f.Write([]byte(fmt.Sprintf("%v\n", recent)))
+	if err != nil {
 		log.Printf("Warning: Failed to write recents file %v", err)
 	}
 }
@@ -41,20 +42,23 @@ func ReadRecent() ([]string, error) {
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		t := scanner.Text()
-		if len(lines) >= 5 {
-			break
-		}
-		if !contains(lines, t) {
-			lines = append(lines, t)
-		}
+		lines = append(lines, scanner.Text())
 	}
-
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
 
-	return lines, nil
+	var result []string
+	for _, line := range lines {
+		if len(result) >= 5 {
+			break
+		}
+		if !contains(result, line) {
+			result = append(result, line)
+		}
+	}
+
+	return result, nil
 }
 
 func createState() (string, error) {

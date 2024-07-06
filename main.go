@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/indimeco/jyggalag/internal/config"
 	"github.com/indimeco/jyggalag/internal/recent"
@@ -179,6 +180,46 @@ func main() {
 
 					state.WriteRecent(recentNote)
 					return template.OpenEditor(c.Editor, recentNote)
+				},
+			},
+			{
+				Name:    "open_compost",
+				Aliases: []string{"co"},
+				Usage:   "open the compost",
+				Action: func(cCtx *cli.Context) error {
+					c, err := config.LoadConfig()
+					if err != nil {
+						return err
+					}
+
+					compostPath := filepath.Join(c.NotesDir, "compost.md")
+					return template.OpenEditor(c.Editor, compostPath)
+				},
+			},
+			{
+				Name:    "add compost",
+				Aliases: []string{"ca"},
+				Usage:   "add to the compost",
+				Action: func(cCtx *cli.Context) error {
+					c, err := config.LoadConfig()
+					if err != nil {
+						return err
+					}
+
+					compostPath := filepath.Join(c.NotesDir, "compost.md")
+					toAdd := fmt.Sprint(strings.Join(cCtx.Args().Slice(), " "))
+					dateStr := timestr.CanonicalDateString()
+
+					f, err := os.OpenFile(compostPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+					defer f.Close()
+					if err != nil {
+						log.Printf("Warning: Failed to open compost file %v", err)
+					}
+					_, err = f.Write([]byte(fmt.Sprintf("%v: %v\n", dateStr, toAdd)))
+					if err != nil {
+						log.Printf("Warning: Failed to write compost file %v", err)
+					}
+					return nil
 				},
 			},
 		},
