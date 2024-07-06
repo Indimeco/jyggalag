@@ -3,6 +3,7 @@ package recent
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -38,13 +39,14 @@ func (m model) View() string {
 	s := "Select recent note\n\n"
 
 	for i, recent := range m.recents {
-
+		recentParts := strings.Split(recent, "/")
+		shortRecent := strings.Join(recentParts[max(0, len(recentParts)-3):], "/")
 		cursor := " "
 		if m.cursor == i {
 			cursor = cursorStyle.Render(">")
-			s += fmt.Sprintf("%s %s\n", cursor, selectedStyle.Render(recent))
+			s += fmt.Sprintf("%s %s\n", cursor, selectedStyle.Render(shortRecent))
 		} else {
-			s += fmt.Sprintf("%s %s\n", cursor, recent)
+			s += fmt.Sprintf("%s %s\n", cursor, shortRecent)
 		}
 	}
 
