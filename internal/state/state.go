@@ -1,12 +1,16 @@
 package state
 
 import (
-	"bufio"
+	"errors"
 	"fmt"
+	"io"
 	"log"
+	"math"
 	"os"
 	"os/user"
 	"path"
+	"slices"
+	"strings"
 )
 
 func WriteRecent(recent string) {
@@ -33,27 +37,34 @@ func ReadRecent() ([]string, error) {
 		log.Printf("Warning: Failed to create recents file %v", err)
 	}
 
-	var lines []string
 	file, err := os.Open(path.Join(stateDir, "recents"))
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("Failed to open file: %w", err)
 	}
 	defer file.Close()
 
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
+	stat, err := file.Stat()
+	if err != nil {
+		return nil, fmt.Errorf("Failed to stat file: %w", err)
 	}
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
+	fileSize := stat.Size()
+	bufSize := int(math.Min(float64(fileSize), float64(500)))
+	start := stat.Size() - int64(bufSize)
+	buf := make([]byte, bufSize)
+	_, err = file.ReadAt(buf, start)
+	if err != nil {
+		if !errors.Is(err, io.EOF) {
+			return nil, err
+		}
 	}
-
-	var result []string
+	lines := strings.Split(string(buf), "\n")
+	slices.Reverse(lines)
+	result := make([]string, 0, 5)
 	for _, line := range lines {
 		if len(result) >= 5 {
 			break
 		}
-		if !contains(result, line) {
+		if !slices.Contains(result, line) {
 			result = append(result, line)
 		}
 	}
@@ -75,13 +86,4 @@ func createState() (string, error) {
 	}
 
 	return stateDir, nil
-}
-
-func contains(slice []string, s string) bool {
-	for _, v := range slice {
-		if v == s {
-			return true
-		}
-	}
-	return false
 }
