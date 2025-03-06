@@ -21,6 +21,8 @@ import (
 
 func main() {
 	app := &cli.App{
+		Name:  "jyggalag",
+		Usage: "manage notes somewhere in the plane of madness",
 		Commands: []*cli.Command{
 			{
 				Name:    "config_note_dir",
@@ -188,41 +190,58 @@ func main() {
 				},
 			},
 			{
-				Name:    "open_compost",
-				Aliases: []string{"co"},
-				Usage:   "open the compost",
+				Name:      "log_view",
+				Aliases:   []string{"lv"},
+				Args:      true,
+				ArgsUsage: "log_view [log_name]",
+				Usage:     "open the log",
 				Action: func(cCtx *cli.Context) error {
 					c, err := config.LoadConfig()
 					if err != nil {
 						return err
 					}
 
-					compostPath := filepath.Join(c.NotesDir, "compost.md")
-					return template.OpenEditor(c.Editor, compostPath)
+					logName := cCtx.Args().Get(0)
+					if logName == "" {
+						return errors.New("Expected a log name")
+					}
+
+					logPath := filepath.Join(c.NotesDir, logName+".md")
+					return template.OpenEditor(c.Editor, logPath)
 				},
 			},
 			{
-				Name:    "add compost",
-				Aliases: []string{"ca"},
-				Usage:   "add to the compost",
+				Name:      "log",
+				Aliases:   []string{"l"},
+				Usage:     "add to the log",
+				Args:      true,
+				ArgsUsage: "log [log_name] [message]",
 				Action: func(cCtx *cli.Context) error {
 					c, err := config.LoadConfig()
 					if err != nil {
 						return err
 					}
 
-					compostPath := filepath.Join(c.NotesDir, "compost.md")
-					toAdd := fmt.Sprint(strings.Join(cCtx.Args().Slice(), " "))
+					logName := cCtx.Args().Get(0)
+					if logName == "" {
+						return errors.New("Expected a log name")
+					}
+
+					logPath := filepath.Join(c.NotesDir, logName+".md")
+					message := strings.Trim(fmt.Sprint(strings.Join(cCtx.Args().Slice()[1:], " ")), " ")
+					if message == "" {
+						return errors.New("Expected a log message")
+					}
 					dateStr := timestr.CanonicalDateString()
 
-					f, err := os.OpenFile(compostPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+					f, err := os.OpenFile(logPath, os.O_APPEND|os.O_WRONLY, 0644)
 					defer f.Close()
 					if err != nil {
-						log.Printf("Warning: Failed to open compost file %v", err)
+						return fmt.Errorf("Warning: Failed to open log file %v", err)
 					}
-					_, err = f.Write([]byte(fmt.Sprintf("%v: %v\n", dateStr, toAdd)))
+					_, err = f.Write([]byte(fmt.Sprintf("%v: %v\n", dateStr, message)))
 					if err != nil {
-						log.Printf("Warning: Failed to write compost file %v", err)
+						return fmt.Errorf("Warning: Failed to write log file %v", err)
 					}
 					return nil
 				},

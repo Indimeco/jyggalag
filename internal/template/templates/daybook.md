@@ -13,15 +13,5 @@ tags:
 
 ## Notes
 
-
-## Snippets/Patterns
-
-
-## Challenges
-
-
-## Learnings
-
-
-# Cooldown
+## Cooldown
 
