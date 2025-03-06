@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -12,6 +13,7 @@ import (
 	"github.com/indimeco/jyggalag/internal/config"
 	"github.com/indimeco/jyggalag/internal/recent"
 	"github.com/indimeco/jyggalag/internal/state"
+	"github.com/indimeco/jyggalag/internal/stats"
 	"github.com/indimeco/jyggalag/internal/template"
 	"github.com/indimeco/jyggalag/internal/timestr"
 	"github.com/urfave/cli/v2"
@@ -95,6 +97,9 @@ func main() {
 					}
 
 					zettelName := cCtx.Args().First()
+					if zettelName == "" {
+						return errors.New("expected a name as first arg")
+					}
 					zettelDir := filepath.Join(c.NotesDir, "zettelkasten")
 					zettelId, err := getNextZettelID(zettelDir)
 					if err != nil {
@@ -219,6 +224,28 @@ func main() {
 					if err != nil {
 						log.Printf("Warning: Failed to write compost file %v", err)
 					}
+					return nil
+				},
+			},
+			{
+				Name:      "stats",
+				Usage:     "show stats for a directory",
+				Args:      true,
+				ArgsUsage: "stats [dir]",
+				Action: func(cCtx *cli.Context) error {
+					c, err := config.LoadConfig()
+					if err != nil {
+						return err
+					}
+
+					dir := filepath.Join(c.NotesDir, cCtx.Args().First())
+					result, err := stats.TopWords(dir, 50)
+					if err != nil {
+						return fmt.Errorf("Failed to get stats: %w", err)
+					}
+
+					fmt.Print(result)
+
 					return nil
 				},
 			},
