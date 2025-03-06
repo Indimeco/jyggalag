@@ -2,7 +2,7 @@
 
 package_name="jyggalag"
 	
-platforms=("darwin/amd64" "linux/amd64" "android/arm64")
+platforms=("darwin/arm64" "darwin/amd64" "linux/amd64" "android/arm64")
 
 for platform in "${platforms[@]}"
 do
