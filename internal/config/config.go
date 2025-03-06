@@ -60,6 +60,14 @@ func initConfig() error {
 	if err != nil {
 		return err
 	}
+	filename := filepath.Join(dir, configFileName)
+
+	// don't re-init the config if it already exists
+	_, err = os.Stat(filename)
+	if err == nil {
+		return nil
+	}
+
 	// make sure the config file always exists
 	err = os.MkdirAll(dir, 0777)
 	if err != nil {
@@ -67,7 +75,7 @@ func initConfig() error {
 	}
 
 	c, err := json.Marshal(Config{
-		NotesDir: "~/projects/notes",
+		NotesDir: "/home/notes",
 		Editor:   "vim",
 	})
 	if err != nil {
@@ -88,10 +96,6 @@ func LoadConfig() (*Config, error) {
 	}
 
 	filename := filepath.Join(dir, configFileName)
-
-	if err != nil {
-		return nil, err
-	}
 
 	data, err := os.ReadFile(filename)
 	if err != nil {
